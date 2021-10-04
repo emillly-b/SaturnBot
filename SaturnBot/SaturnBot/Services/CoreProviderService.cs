@@ -8,14 +8,14 @@ using Discord.WebSocket;
 
 namespace SaturnBot.Services
 {
-    public class CoreService
+    public class CoreProviderService
     {
         private readonly CommandService _commands;
         private readonly DiscordShardedClient _discord;
         private readonly IServiceProvider _services;
         private Core Core { get; set;}
 
-        public CoreService(IServiceProvider services)
+        public CoreProviderService(IServiceProvider services)
         {
             _commands = services.GetRequiredService<CommandService>();
             _discord = services.GetRequiredService<DiscordShardedClient>();

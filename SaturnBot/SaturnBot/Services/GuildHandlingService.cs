@@ -23,15 +23,9 @@ namespace SaturnBot.Services
             _discord.GuildAvailable += GuildAvailable;
             
         }
-
         private Task GuildAvailable(SocketGuild arg)
         {
             throw new NotImplementedException();
-        }
-
-        public async Task InitializeAsync()
-        {
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         }
     }
 }
