@@ -10,7 +10,7 @@ using SaturnBot.Services;
 
 namespace SaturnBot
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
         public async Task MainAsync()
@@ -20,23 +20,31 @@ namespace SaturnBot
                 TotalShards = 1
             };
 
-            Core SaturnCore = new Core();
-            using (var services = SaturnCore.ConfigureServices(config))
+            using (var services = ConfigureServices(config))
             {
-
+                
+                var core = services.GetService<CoreService>().GetCore();
                 var client = services.GetRequiredService<DiscordShardedClient>();
 
-                client.ShardReady += SaturnCore.ReadyAsync;
-                client.Log += SaturnCore.LogAsync;
+                client.ShardReady += core.ReadyAsync;
+                client.Log += core.LogAsync;
 
                 await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
 
-                await client.LoginAsync(TokenType.Bot, SaturnCore.Configuration.BotToken);
+                await client.LoginAsync(TokenType.Bot, core.Configuration.BotToken);
                 await client.StartAsync();
 
                 await Task.Delay(Timeout.Infinite);
             }
         }
-
+        public ServiceProvider ConfigureServices(DiscordSocketConfig config)
+        {
+            return new ServiceCollection()
+                .AddSingleton(new DiscordShardedClient(config))
+                .AddSingleton<CommandService>()
+                .AddSingleton<CoreService>()
+                .AddSingleton<CommandHandlingService>()
+                .BuildServiceProvider();
+        }
     }
 }

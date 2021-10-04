@@ -15,24 +15,15 @@ namespace SaturnBot
 {
     public class Core
     {
-        public Configuration Configuration { get; set; }
-
+        public Configuration Configuration { get; set; }        
         public Core()
         {
             Configuration = Configuration.GetConfiguration("./Data/Config.json");
         }
 
-        public ServiceProvider ConfigureServices(DiscordSocketConfig config)
-        {
-            return new ServiceCollection()
-                .AddSingleton(new DiscordShardedClient(config))
-                .AddSingleton<CommandService>()
-                .AddSingleton<CommandHandlingService>()
-                .BuildServiceProvider();
-        }
+
         public Task ReadyAsync(DiscordSocketClient shard)
         {
-            Console.WriteLine($"Shard Number {shard.ShardId} is connected and ready!");
             return Task.CompletedTask;
         }
         public Task LogAsync(LogMessage log)
