@@ -35,6 +35,11 @@ namespace SaturnBot.Modules
             //teehee.
             if (Context.Message.Author.Id != 341275030941859850)
                 return;
+            if (Context.Channel is SocketDMChannel)
+            {
+                await Context.Message.ReplyAsync("This command can only be used in a guild channel.");
+                return;
+            }
             var msgs = await Context.Channel.GetMessagesAsync(PurgeAmount).FlattenAsync();
             var channel = (SocketTextChannel) Context.Channel;
             await channel.DeleteMessagesAsync(msgs);
