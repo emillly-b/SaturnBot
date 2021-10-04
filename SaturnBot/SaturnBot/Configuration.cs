@@ -17,6 +17,9 @@ namespace SaturnBot
         [JsonPropertyName("DBString")]
         public string DataBaseString { get; set; }
 
+        [JsonPropertyName("prefix")]
+        public char Prefix { get; set; }
+
         public Configuration()
         {
         }

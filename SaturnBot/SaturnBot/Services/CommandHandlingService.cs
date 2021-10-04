@@ -33,14 +33,14 @@ namespace SaturnBot.Services
         public async Task MessageReceivedAsync(SocketMessage rawMessage)
         {
             // Ignore system messages, or messages from other bots
-            if (!(rawMessage is SocketUserMessage message))
+            if (rawMessage is not SocketUserMessage message)
                 return;
             if (message.Source != MessageSource.User)
                 return;
 
             // This value holds the offset where the prefix ends
             var argPos = 0;
-            if (!message.HasMentionPrefix(_discord.CurrentUser, ref argPos))
+            if (!message.HasCharPrefix('>', ref argPos))
                 return;
 
             // A new kind of command context, ShardedCommandContext can be utilized with the commands framework
@@ -59,7 +59,7 @@ namespace SaturnBot.Services
                 return;
 
             // the command failed, let's notify the user that something happened.
-            await context.Channel.SendMessageAsync($"error: {result.ToString()}");
+            await context.Channel.SendMessageAsync($"error: {result}");
         }
 
         private Task LogAsync(LogMessage log)
