@@ -18,7 +18,7 @@ namespace SaturnBot
         public string DataBaseString { get; set; }
 
         [JsonPropertyName("prefix")]
-        public char Prefix { get; set; }
+        public string Prefix { get; set; }
 
         public Configuration()
         {
@@ -28,6 +28,10 @@ namespace SaturnBot
         {
             var json = File.ReadAllText(path);
             return JsonSerializer.Deserialize<Configuration>(json);
+        }
+        public char GetPrefix()
+        {
+            return Prefix[0];
         }
     }
 }
