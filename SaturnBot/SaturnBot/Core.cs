@@ -20,8 +20,6 @@ namespace SaturnBot
         {
             Configuration = Configuration.GetConfiguration("./Data/Config.json");
         }
-
-
         public Task ReadyAsync(DiscordSocketClient shard)
         {
             return Task.CompletedTask;

@@ -21,7 +21,6 @@ namespace SaturnBot.Services
             _discord = services.GetRequiredService<DiscordShardedClient>();
             _services = services;
             Core = new Core();
-
         }
         public Core GetCore()
         {
