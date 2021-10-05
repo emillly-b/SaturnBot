@@ -10,16 +10,10 @@ namespace SaturnBot.Services
 {
     public class CoreProviderService
     {
-        private readonly CommandService _commands;
-        private readonly DiscordShardedClient _discord;
-        private readonly IServiceProvider _services;
         private Core Core { get; set;}
 
         public CoreProviderService(IServiceProvider services)
         {
-            _commands = services.GetRequiredService<CommandService>();
-            _discord = services.GetRequiredService<DiscordShardedClient>();
-            _services = services;
             Core = new Core();
         }
         public Core GetCore()

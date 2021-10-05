@@ -28,10 +28,12 @@ namespace SaturnBot
                 var core = services.GetService<CoreProviderService>().GetCore();
                 var client = services.GetRequiredService<DiscordShardedClient>();
 
+                
                 client.ShardReady += core.ReadyAsync;
                 client.Log += core.LogAsync;
 
                 await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+                services.GetRequiredService<ReactionHandlingService>().Initialize();
 
                 await client.LoginAsync(TokenType.Bot, core.Configuration.BotToken);
                 await client.StartAsync();
@@ -44,8 +46,9 @@ namespace SaturnBot
             return new ServiceCollection()
                 .AddSingleton(new DiscordShardedClient(config))
                 .AddSingleton<CommandService>()
-                .AddSingleton<CoreProviderService>()
                 .AddSingleton<CommandHandlingService>()
+                .AddSingleton<CoreProviderService>()
+                .AddSingleton<ReactionHandlingService>()                             
                 .BuildServiceProvider();
         }
     }
