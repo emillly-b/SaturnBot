@@ -14,10 +14,6 @@ namespace SaturnBot.Modules
 {
     public class ModerationModule : ModuleBase<ShardedCommandContext>
     {
-        ulong SafeRoleId = 868547121933058067;
-        ulong UnsafeRoleId = 868667796870021201;
-        ulong SafeChannelId = 868551387624120340;
-
         public IServiceProvider Services { get; set; }
 
         [Command("kick")]
@@ -57,9 +53,10 @@ namespace SaturnBot.Modules
             var userid = MentionUtils.ParseUser(input);
             var messages = Context.Channel.GetMessagesAsync().Flatten().GetAsyncEnumerator();
             var user = Context.Guild.GetUser(userid);
-            await user.AddRoleAsync(SafeRoleId);
-            await user.RemoveRoleAsync(UnsafeRoleId);
             var guild = Services.GetRequiredService<GuildHandlingService>().ActiveGuilds.Find(a => a.DiscordId == Context.Guild.Id);
+            await user.AddRoleAsync(guild.VerifiedRoleId);
+            await user.RemoveRoleAsync(guild.UnVerifiedRoleId);
+            
             while (await messages.MoveNextAsync())
             {
 
@@ -74,7 +71,7 @@ namespace SaturnBot.Modules
                         .WithTitle($"{messages.Current.Author.Username}'s Introduction!");
                     embed.AddField("Intro:", messages.Current.Content);
                     var introEmbed = embed.Build();
-                    var safeChannel = (ISocketMessageChannel) Context.Guild.GetChannel(SafeChannelId);
+                    var safeChannel = (ISocketMessageChannel) Context.Guild.GetChannel(guild.IntroChannelId);
                     var introMessage = await safeChannel.SendMessageAsync("", embed: introEmbed);
                     var dbUser = guild.Members.Find(a => a.DiscordId == userid);
                     dbUser.IntroMessageId = introMessage.Id;
@@ -83,8 +80,7 @@ namespace SaturnBot.Modules
                     
                     break;
                 }
-            }
-            
+            }            
             await Context.Message.DeleteAsync();
         }
     }
