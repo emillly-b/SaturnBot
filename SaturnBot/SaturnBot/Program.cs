@@ -7,6 +7,8 @@ using Discord.API;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using SaturnBot.Services;
+using MongoDB.Entities;
+using MongoDB.Driver;
 
 namespace SaturnBot
 {
@@ -24,19 +26,21 @@ namespace SaturnBot
 
             using (var services = ConfigureServices(config))
             {
-                
                 var core = services.GetService<CoreProviderService>().GetCore();
                 var client = services.GetRequiredService<DiscordShardedClient>();
+                await DB.InitAsync("saturndb", MongoClientSettings.FromConnectionString(core.Configuration.DataBaseString));
 
-                
                 client.ShardReady += core.ReadyAsync;
                 client.Log += core.LogAsync;
 
-                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();                
                 services.GetRequiredService<ReactionHandlingService>().Initialize();
 
                 await client.LoginAsync(TokenType.Bot, core.Configuration.BotToken);
                 await client.StartAsync();
+
+                await Task.Delay(1000);
+                await services.GetRequiredService<GuildHandlingService>().InitializeAsync();
 
                 await Task.Delay(Timeout.Infinite);
             }

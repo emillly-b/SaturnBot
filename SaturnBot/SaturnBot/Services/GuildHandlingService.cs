@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using SaturnBot.Entities;
+using MongoDB.Entities;
 
 namespace SaturnBot.Services
 {
@@ -22,20 +23,40 @@ namespace SaturnBot.Services
             _commands = services.GetRequiredService<CommandService>();
             _discord = services.GetRequiredService<DiscordShardedClient>();
             _services = services;
-
-            ActiveGuilds = new List<Guild>();
             _discord.GuildAvailable += GuildAvailable;
-            foreach (SocketGuild guild in _discord.Guilds)
-                ActiveGuilds.Add(new Guild(guild));
+            _discord.UserJoined += UserJoined;
+            _discord.UserLeft += UserLeft;
+        }
+        public async Task InitializeAsync()
+        {
+            ActiveGuilds = new List<Guild>();
+            var guilds = await DB.Find<Guild>().ManyAsync(a => true);
+            foreach(Guild g in guilds)
+            {
+                ActiveGuilds.Add(g);
+            }
+            foreach (SocketGuild sockGuild in _discord.Guilds)
+            {
+                var guild = new Guild(sockGuild);
+                if (ActiveGuilds.Contains(guild))
+                    break;
+                ActiveGuilds.Add(guild);
+                await guild.SaveAsync();
+            }
         }
         public Guild GetGuild(ulong id)
         {
-            return ActiveGuilds.Find(x => x.Id == id);
+            return ActiveGuilds.Find(x => x.DiscordId == id);
+        }
+        public async Task SaveGuildsAsync()
+        {
+            foreach (Guild g in ActiveGuilds)
+                await g.SaveAsync();
         }
 
         private async Task GuildAvailable(SocketGuild arg)
         {
-            ActiveGuilds.Add(new Guild(arg));
+            //   
         }
         private async Task GuildMemberUpdated(Cacheable<SocketGuildUser,ulong> userBefore, SocketGuildUser userAfter)
         {
@@ -48,6 +69,42 @@ namespace SaturnBot.Services
                 var channel = _discord.GetChannel(guild.LoggingChannelId) as ITextChannel;
                 await channel.SendMessageAsync("", embed: embed.Build());
             }
+        }
+
+        private async Task UserJoined(SocketGuildUser user)
+        {
+            var context = GetGuild(user.Guild.Id);
+            context.Members.Add(new User(user));
+            var embed = new EmbedBuilder()
+                        .WithColor(Color.Blue)
+                        .WithDescription("User Joined:" + MentionUtils.MentionUser(user.Id))
+                        .WithThumbnailUrl(user.GetAvatarUrl())
+                        .WithCurrentTimestamp()
+                        .WithAuthor(_discord.CurrentUser);
+            embed.AddField("ID: ", user.Id, inline: true);
+            embed.AddField("Account Age", user.CreatedAt.ToString(), inline: true);
+            embed.AddField("User Status", user.Status.ToString());
+            var joinedEmbed = embed.Build();
+            var log = _discord.GetChannel(context.LoggingChannelId) as ITextChannel;
+            await log.SendMessageAsync("", embed: joinedEmbed);
+        }
+
+        private async Task UserLeft(SocketGuildUser user)
+        {
+            var context = GetGuild(user.Guild.Id);
+            context.Members.Add(new User(user));
+            var embed = new EmbedBuilder()
+                        .WithColor(Color.Blue)
+                        .WithDescription("User Left:" + MentionUtils.MentionUser(user.Id))
+                        .WithThumbnailUrl(user.GetAvatarUrl())
+                        .WithCurrentTimestamp()
+                        .WithAuthor(_discord.CurrentUser);
+            embed.AddField("ID: ", user.Id, inline: true);
+            embed.AddField("Account Age", user.CreatedAt.ToString(), inline: true);
+            embed.AddField("Role Count", user.Roles.Count, inline: true);
+            var leftEmbed = embed.Build();
+            var log = _discord.GetChannel(context.LoggingChannelId) as ITextChannel;
+            await log.SendMessageAsync("", embed: leftEmbed);
         }
     }
 }

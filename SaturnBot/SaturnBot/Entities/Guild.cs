@@ -6,12 +6,16 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using MongoDB.Entities;
+using MongoDB;
+using System.Text.Json;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace SaturnBot.Entities
 {
-    public class Guild
-    {        
-        public ulong Id { get; set; }
+    public class Guild : Entity
+    {
+        public ulong DiscordId { get; set; }
         public string Prefix { get; set; }
         public ulong OwnerId { get; set; }
         public ulong LoggingChannelId { get; set; }
@@ -19,21 +23,27 @@ namespace SaturnBot.Entities
         public ulong VerifiedRoleId { get; set; }
         public ulong UnVerifiedRoleId { get; set; }
         public List<User> Members { get; set; }
-
+        public override string GenerateNewID() => DiscordId.ToString();
+        public override bool Equals(object obj)
+        {            
+            if (obj is not Guild) return false;
+            var guild = (Guild)obj;
+            if (DiscordId == guild.DiscordId) 
+                return true;
+            return false;
+        }
         public Guild(SocketGuild socketGuild)
         {
             Members = new List<User>();
-            Id = socketGuild.Id;
+            DiscordId = socketGuild.Id;
+            OwnerId = socketGuild.OwnerId;
+            Prefix = ">";
             var members = socketGuild.Users.GetEnumerator();
             while(members.MoveNext())
             {
-                var newuser = new User();
-                newuser.Id = members.Current.Id;
-                newuser.IsPresent = true;
-                newuser.Username = members.Current.Username;
-                Members.Add(newuser);
+                var user = new User(members.Current);
+                Members.Add(user);
             }
-            OwnerId = socketGuild.OwnerId;
         }
     }
 }

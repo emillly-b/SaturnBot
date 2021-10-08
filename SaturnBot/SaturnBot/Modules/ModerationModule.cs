@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
 using Discord;
+using Microsoft.Extensions.DependencyInjection;
+using SaturnBot.Services;
+using MongoDB.Entities;
 
 namespace SaturnBot.Modules
 {
@@ -15,6 +18,7 @@ namespace SaturnBot.Modules
         ulong UnsafeRoleId = 868667796870021201;
         ulong SafeChannelId = 868551387624120340;
 
+        public IServiceProvider Services { get; set; }
 
         [Command("kick")]
         [RequireUserPermission(GuildPermission.KickMembers)]
@@ -23,6 +27,7 @@ namespace SaturnBot.Modules
             ulong userTokick = MentionUtils.ParseUser(user);
             await Context.Guild.GetUser(userTokick).KickAsync();
         }
+
         [Command("ban")]
         [RequireUserPermission(GuildPermission.BanMembers)]
         public async Task BanAsync(string user, string reason)
@@ -30,6 +35,7 @@ namespace SaturnBot.Modules
             ulong userTokick = MentionUtils.ParseUser(user);
             await Context.Guild.GetUser(userTokick).BanAsync();
         }
+
         [Command("purge")]
         [RequireUserPermission(ChannelPermission.ManageMessages)]
         public async Task PurgeAsync(int PurgeAmount)
@@ -43,18 +49,24 @@ namespace SaturnBot.Modules
             var channel = (SocketTextChannel)Context.Channel;
             await channel.DeleteMessagesAsync(msgs);
         }
+
         [Command("welcome")]
         [RequireUserPermission(GuildPermission.KickMembers)]
         public async Task WelcomeAsync(string input)
         {
             var userid = MentionUtils.ParseUser(input);
             var messages = Context.Channel.GetMessagesAsync().Flatten().GetAsyncEnumerator();
-            while(await messages.MoveNextAsync())
+            var user = Context.Guild.GetUser(userid);
+            await user.AddRoleAsync(SafeRoleId);
+            await user.RemoveRoleAsync(UnsafeRoleId);
+            var guild = Services.GetRequiredService<GuildHandlingService>().ActiveGuilds.Find(a => a.DiscordId == Context.Guild.Id);
+            while (await messages.MoveNextAsync())
             {
+
                 if(messages.Current.Author.Id == userid)
                 {
                     var embed = new EmbedBuilder()
-                        .WithColor(Color.LightOrange)
+                        .WithColor(Color.Blue)
                         .WithDescription("Welcome " + MentionUtils.MentionUser(userid))
                         .WithThumbnailUrl(messages.Current.Author.GetAvatarUrl())
                         .WithCurrentTimestamp()
@@ -63,14 +75,16 @@ namespace SaturnBot.Modules
                     embed.AddField("Intro:", messages.Current.Content);
                     var introEmbed = embed.Build();
                     var safeChannel = (ISocketMessageChannel) Context.Guild.GetChannel(SafeChannelId);
-                    await safeChannel.SendMessageAsync("", embed: introEmbed);
+                    var introMessage = await safeChannel.SendMessageAsync("", embed: introEmbed);
+                    var dbUser = guild.Members.Find(a => a.DiscordId == userid);
+                    dbUser.IntroMessageId = introMessage.Id;
+                    await dbUser.SaveAsync();
                     await messages.Current.DeleteAsync();
+                    
                     break;
                 }
             }
-            var user = Context.Guild.GetUser(userid);
-            await user.AddRoleAsync(SafeRoleId);
-            await user.RemoveRoleAsync(UnsafeRoleId);
+            
             await Context.Message.DeleteAsync();
         }
     }
