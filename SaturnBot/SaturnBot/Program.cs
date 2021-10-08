@@ -48,7 +48,8 @@ namespace SaturnBot
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<CoreProviderService>()
-                .AddSingleton<ReactionHandlingService>()                             
+                .AddSingleton<ReactionHandlingService>()    
+                .AddSingleton<GuildHandlingService>()
                 .BuildServiceProvider();
         }
     }

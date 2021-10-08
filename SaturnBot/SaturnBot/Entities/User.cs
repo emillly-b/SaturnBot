@@ -9,10 +9,8 @@ namespace SaturnBot.Entities
     public class User
     {
         public ulong Id { get; set; }
-        public List<string> Usernames { get; set; }
-        public List<string> Nicknames { get; set; }
-        public List<string> Warnings { get; set; }
-        public ulong Messages { get; set; }
+        public string Username { get; set; }
+        public ulong IntroMessageId { get; set; }
         public bool IsPresent { get; set; }
     }
 }
