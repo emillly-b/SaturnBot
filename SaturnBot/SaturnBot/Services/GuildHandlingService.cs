@@ -16,24 +16,27 @@ namespace SaturnBot.Services
         private readonly CommandService _commands;
         private readonly DiscordShardedClient _discord;
         private readonly IServiceProvider _services;
+        private readonly LogService _log;
         public List<Guild> ActiveGuilds;
 
         public GuildHandlingService(IServiceProvider services)
         {
             _commands = services.GetRequiredService<CommandService>();
             _discord = services.GetRequiredService<DiscordShardedClient>();
+            _log = services.GetRequiredService<LogService>();
             _services = services;
-            _discord.GuildAvailable += GuildAvailable;
-            _discord.UserJoined += UserJoined;
-            _discord.UserLeft += UserLeft;
         }
         public async Task InitializeAsync()
         {
             ActiveGuilds = new List<Guild>();
+            _discord.GuildAvailable += GuildAvailable;
+            _discord.UserJoined += UserJoined;
+            _discord.UserLeft += UserLeft;
             var guilds = await DB.Find<Guild>().ManyAsync(a => true);
             foreach(Guild g in guilds)
             {
                 ActiveGuilds.Add(g);
+                _log.LogMessage($"Guild added: {g.Name}");
             }
             foreach (SocketGuild sockGuild in _discord.Guilds)
             {
@@ -41,6 +44,7 @@ namespace SaturnBot.Services
                 if (ActiveGuilds.Contains(guild))
                     break;
                 ActiveGuilds.Add(guild);
+                _log.LogMessage($"Guild added from Client: {guild.Name}");
                 await guild.SaveAsync();
             }
         }

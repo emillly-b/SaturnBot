@@ -28,10 +28,14 @@ namespace SaturnBot
             {
                 var core = services.GetService<CoreProviderService>().GetCore();
                 var client = services.GetRequiredService<DiscordShardedClient>();
+                var logger = services.GetRequiredService<LogService>();
+                logger.LogMessage("Log Started");
+                logger.InitializeAsync();
+
                 await DB.InitAsync("saturndb", MongoClientSettings.FromConnectionString(core.Configuration.DataBaseString));
 
+
                 client.ShardReady += core.ReadyAsync;
-                client.Log += core.LogAsync;
 
                 await services.GetRequiredService<CommandHandlingService>().InitializeAsync();                
                 services.GetRequiredService<ReactionHandlingService>().Initialize();
@@ -49,6 +53,7 @@ namespace SaturnBot
         {
             return new ServiceCollection()
                 .AddSingleton(new DiscordShardedClient(config))
+                .AddSingleton<LogService>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<CoreProviderService>()

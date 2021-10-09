@@ -24,10 +24,5 @@ namespace SaturnBot
         {
             return Task.CompletedTask;
         }
-        public Task LogAsync(LogMessage log)
-        {
-            Console.WriteLine(log.ToString());
-            return Task.CompletedTask;
-        }
     }
 }
