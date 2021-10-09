@@ -20,16 +20,20 @@ namespace SaturnBot.Modules
         [RequireUserPermission(GuildPermission.KickMembers)]
         public async Task KickAsync(string user)
         {
-            ulong userTokick = MentionUtils.ParseUser(user);
-            await Context.Guild.GetUser(userTokick).KickAsync();
+            if (MentionUtils.TryParseUser(user, out ulong uid))
+                await Context.Guild.GetUser(uid).KickAsync();
+            else
+                await Context.Guild.GetUser(ulong.Parse(user)).KickAsync();
         }
 
         [Command("ban")]
         [RequireUserPermission(GuildPermission.BanMembers)]
         public async Task BanAsync(string user, string reason)
         {
-            ulong userTokick = MentionUtils.ParseUser(user);
-            await Context.Guild.GetUser(userTokick).BanAsync();
+            if (MentionUtils.TryParseUser(user, out ulong uid))
+                await Context.Guild.GetUser(uid).BanAsync(reason: reason);
+            else
+                await Context.Guild.GetUser(ulong.Parse(user)).BanAsync(reason: reason);
         }
 
         [Command("purge")]
@@ -59,7 +63,6 @@ namespace SaturnBot.Modules
             
             while (await messages.MoveNextAsync())
             {
-
                 if(messages.Current.Author.Id == userid)
                 {
                     var embed = new EmbedBuilder()
@@ -76,8 +79,7 @@ namespace SaturnBot.Modules
                     var dbUser = guild.Members.Find(a => a.DiscordId == userid);
                     dbUser.IntroMessageId = introMessage.Id;
                     await dbUser.SaveAsync();
-                    await messages.Current.DeleteAsync();
-                    
+                    await messages.Current.DeleteAsync();                    
                     break;
                 }
             }            
