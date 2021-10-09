@@ -16,6 +16,7 @@ namespace SaturnBot.Entities
     public class Guild : Entity
     {
         public ulong DiscordId { get; set; }
+        public string Name { get; set; }
         public string Prefix { get; set; }
         public ulong OwnerId { get; set; }
         public ulong LoggingChannelId { get; set; }
@@ -38,6 +39,7 @@ namespace SaturnBot.Entities
             DiscordId = socketGuild.Id;
             OwnerId = socketGuild.OwnerId;
             Prefix = ">";
+            Name = socketGuild.Name;
             var members = socketGuild.Users.GetEnumerator();
             while(members.MoveNext())
             {
