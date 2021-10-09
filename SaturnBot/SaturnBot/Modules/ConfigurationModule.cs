@@ -21,7 +21,9 @@ namespace SaturnBot.Modules
         public async Task UpdateSafeRole(string roleMention)
         {
             ulong cleanRoleId = MentionUtils.ParseRole(roleMention);
-            Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id).VerifiedRoleId = cleanRoleId;
+            var guild = Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id);
+            guild.VerifiedRoleId = cleanRoleId;
+            await guild.SaveAsync();
             await ReplyAsync($"Safe role has been set to: {roleMention}");
         }
 
@@ -30,7 +32,9 @@ namespace SaturnBot.Modules
         public async Task UpdateUnSafeRole(string roleMention)
         {
             ulong roleId = MentionUtils.ParseRole(roleMention);
-            Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id).UnVerifiedRoleId = roleId;
+            var guild = Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id);
+            guild.UnVerifiedRoleId = roleId;
+            await guild.SaveAsync();
             await ReplyAsync($"UnSafe role has been set to: {roleMention}");
         }
 
@@ -38,7 +42,9 @@ namespace SaturnBot.Modules
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task UpdatePrefix(string newPrefix)
         {
-            Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id).Prefix = newPrefix;
+            var guild = Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id);
+            guild.Prefix = newPrefix;
+            await guild.SaveAsync();
             await ReplyAsync($"Prefix has been set to: `{newPrefix}`");
         }
 
@@ -46,8 +52,10 @@ namespace SaturnBot.Modules
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task UpdateLogChannel(string channelMention)
         {
+            var guild = Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id);
             ulong channelid = MentionUtils.ParseChannel(channelMention);
-            Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id).LoggingChannelId = channelid;
+            guild.LoggingChannelId = channelid;
+            await guild.SaveAsync();
             await ReplyAsync($"Log channel has been set to: {channelMention}");
         }
 
@@ -55,8 +63,10 @@ namespace SaturnBot.Modules
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task UpdateIntroChannel(string channelMention)
         {
+            var guild = Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id);
             ulong channelid = MentionUtils.ParseChannel(channelMention);
-            Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id).IntroChannelId = channelid;
+            guild.IntroChannelId = channelid;
+            await guild.SaveAsync();
             await ReplyAsync($"Intro channel has been set to: {channelMention}");
         }
 
@@ -66,7 +76,7 @@ namespace SaturnBot.Modules
         {
             var guild = Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id);
             ulong channelid = guild.IntroChannelId;
-            if (channelid == null)
+            if (channelid == 0)
             {
                 await ReplyAsync($"Intro channel has not been configured. Run `{guild.Prefix}config` to show active settings");
                 return;
