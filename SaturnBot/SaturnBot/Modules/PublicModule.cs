@@ -1,16 +1,52 @@
-using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Discord.Commands;
+using Discord.WebSocket;
 using Discord;
+using SaturnBot.Services;
+using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Entities;
 
 namespace SaturnBot.Modules
 {
-    // Remember to make your module reference the ShardedCommandContext
+    [Remarks("Public Commands")]
     public class PublicModule : ModuleBase<ShardedCommandContext>
     {
+        public IServiceProvider Services { get; set; }
+        public CommandService Commands { get; set; }
+
+        [Command("help")]
+        [Remarks("Lists all commands and general information about Saturn.")]
+        public async Task HelpAsync()
+        {
+            var commandList = Commands.Modules.ToList();
+            var builder = new EmbedBuilder()
+            {
+                Color = Color.Blue,
+                Title = "Help Screen",
+                ThumbnailUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                Description = "Saturn Bot: its wiggy"
+            };
+            builder.WithCurrentTimestamp();
+            builder.AddField("Command Count:", Commands.Commands.ToList().Count);
+            foreach (ModuleInfo info in commandList)
+            {
+                string commands = "";
+                foreach(CommandInfo command in info.Commands.ToList())
+                {
+                    commands += $"`{command.Name}` - {command.Remarks}\r\n";
+                }
+                builder.AddField(info.Remarks, "\r\n" + commands);
+            }
+            var helpEmbed = builder.Build();
+            await ReplyAsync("", embed: helpEmbed);
+        }
+
         [Command("info")]
+        [Remarks("Lists general information about Saturn.")]
         public async Task InfoAsync()
         {
             var builder = new EmbedBuilder()
@@ -26,33 +62,31 @@ namespace SaturnBot.Modules
         }
 
         [Command("praise")]
-        public async Task PraiseAsync(string user)
+        [Remarks("Praises whatever you tell it too!.")]
+        public async Task PraiseAsync(string thingToPraise)
         {
-            var id = MentionUtils.ParseUser(user);
             var author = Context.Message.Author.Mention;
-            var mention = Context.Guild.GetUser(id).Mention;
-            await ReplyAsync($"{author} has chosen {mention} as their lord and savior, praise {mention}");
+            if (MentionUtils.TryParseUser(thingToPraise, out ulong id))
+            {
+                var mention = Context.Guild.GetUser(id).Mention;
+                await ReplyAsync($"{author} has chosen {mention} as their lord and savior, praise {mention}");
+            }
+            else
+            {
+                await ReplyAsync($"{author} has chosen {thingToPraise} as their lord and savior, praise {thingToPraise}");
+            }
         }
 
-        [Command("quiz")]
-        public async Task ShitListAsync()
+        [Command("spook")]
+        [Remarks("Returns the spooky version of the input text.")]
+        public async Task SpookAsync(string input)
         {
-            var chars = new string[,]
+            var newstring = "";
+            foreach(char c in input)
             {
-                {"Max", "https://decider.com/wp-content/uploads/2019/06/stranger-things-max.jpg?quality=90&strip=all&w=646&h=431&crop=1"},
-                { "Dustin", "https://static.wikia.nocookie.net/strangerthings8338/images/1/18/Dustin_S2.png/revision/latest?cb=20180319174421"},
-                { "Eleven",  "https://media.vanityfair.com/photos/59f370dd16ff751cf425ef46/master/pass/wv_publicity_pre_launch_A_still_23.jpg"},
-                { "Billy", "https://adultpaintbynumber.com/wp-content/uploads/2020/10/Billy-Hargrove-paint-by-numbers.jpg" },
-                { "Billy", "https://www.pinclipart.com/picdir/middle/91-914392_billy-png-clipart-billy-y-mandy-render-transparent.png" }
-            };
-            var rand = new Random();
-            var index = rand.Next(4);
-            var builder = new EmbedBuilder()
-                .WithTitle($"You are {chars[index, 0]}!")
-                .WithImageUrl($"{chars[index, 1]}")
-                .WithFooter("List Credit: WickedCat!");
-            var embed = builder.Build();
-            await Context.Message.ReplyAsync("", embed: embed);
+                newstring += c + " ";
+            }
+            await ReplyAsync(newstring);
         }
     }
 }

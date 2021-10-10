@@ -12,11 +12,13 @@ using MongoDB.Entities;
 
 namespace SaturnBot.Modules
 {
+    [Remarks("Moderation Commands")]
     public class ModerationModule : ModuleBase<ShardedCommandContext>
     {
         public IServiceProvider Services { get; set; }
 
         [Command("kick")]
+        [Remarks("Removes the user from the server.")]
         [RequireUserPermission(GuildPermission.KickMembers)]
         public async Task KickAsync(string user)
         {
@@ -27,6 +29,7 @@ namespace SaturnBot.Modules
         }
 
         [Command("ban")]
+        [Remarks("Bans the user from the server without removing posts.")]
         [RequireUserPermission(GuildPermission.BanMembers)]
         public async Task BanAsync(string user, string reason)
         {
@@ -36,7 +39,19 @@ namespace SaturnBot.Modules
                 await Context.Guild.GetUser(ulong.Parse(user)).BanAsync(reason: reason);
         }
 
+        [Command("nuke")]
+        [Remarks("Bans the user and removes all posts made by the user in the last day")]
+        [RequireUserPermission(GuildPermission.BanMembers)]
+        public async Task NukeAsync(string user, string reason)
+        {
+            if (MentionUtils.TryParseUser(user, out ulong uid))
+                await Context.Guild.GetUser(uid).BanAsync(reason: reason, pruneDays: 1);
+            else
+                await Context.Guild.GetUser(ulong.Parse(user)).BanAsync(reason: reason, pruneDays: 1);
+        }
+
         [Command("purge")]
+        [Remarks("Deletes specified amount of messages from the current channel")]
         [RequireUserPermission(ChannelPermission.ManageMessages)]
         public async Task PurgeAsync(int PurgeAmount)
         {
@@ -51,6 +66,7 @@ namespace SaturnBot.Modules
         }
 
         [Command("welcome")]
+        [Remarks("Welcomes a user into the server and cross posts their intro to the safe channel")]
         [RequireUserPermission(GuildPermission.KickMembers)]
         public async Task WelcomeAsync(string input)
         {

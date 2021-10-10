@@ -12,11 +12,14 @@ using MongoDB.Entities;
 
 namespace SaturnBot.Modules
 {
+    [Remarks("Configuration Commands")]
     public class ConfigurationModule : ModuleBase<ShardedCommandContext>
     {
         public IServiceProvider Services { get; set; }
+        public CommandService Commands { get; set; }
 
         [Command("saferole")]
+        [Remarks("Set's the role to assign when the welcome command is used.")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task UpdateSafeRole(string roleMention)
         {
@@ -28,6 +31,7 @@ namespace SaturnBot.Modules
         }
 
         [Command("unsaferole")]
+        [Remarks("Set's the role to unassign when the welcome command is used.")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task UpdateUnSafeRole(string roleMention)
         {
@@ -39,6 +43,7 @@ namespace SaturnBot.Modules
         }
 
         [Command("setprefix")]
+        [Remarks("Set's the prefix the bot will listen too in this guild.")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task UpdatePrefix(string newPrefix)
         {
@@ -49,6 +54,7 @@ namespace SaturnBot.Modules
         }
 
         [Command("logchannel")]
+        [Remarks("Set's the channel to be used for guild specific logs.")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task UpdateLogChannel(string channelMention)
         {
@@ -60,6 +66,7 @@ namespace SaturnBot.Modules
         }
 
         [Command("introchannel")]
+        [Remarks("Set's the channel to assign when the welcome command is used.")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task UpdateIntroChannel(string channelMention)
         {
@@ -71,6 +78,7 @@ namespace SaturnBot.Modules
         }
 
         [Command("migrateintros")]
+        [Remarks("Adds intros to database.")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task ProcessIntroChannel()
         {
@@ -109,7 +117,8 @@ namespace SaturnBot.Modules
             await ReplyAsync("Intros updated. Bad intros found: " + badIntros);
         }
 
-        [Command("config")]
+        [Command("printconfig")]
+        [Remarks("Prints current Guild configuration")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task PrintConfig()
         {
