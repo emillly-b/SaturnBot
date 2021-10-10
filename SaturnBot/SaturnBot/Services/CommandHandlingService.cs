@@ -21,7 +21,6 @@ namespace SaturnBot.Services
             _services = services;
 
             _commands.CommandExecuted += CommandExecutedAsync;
-            _commands.Log += LogAsync;
             _discord.MessageReceived += MessageReceivedAsync;
         }
 
@@ -60,14 +59,7 @@ namespace SaturnBot.Services
                 return;
 
             // the command failed, let's notify the user that something happened.
-            await context.Channel.SendMessageAsync($"error: {result}");
-        }
-
-        private Task LogAsync(LogMessage log)
-        {
-            Console.WriteLine(log.ToString());
-
-            return Task.CompletedTask;
+            await context.Channel.SendMessageAsync($"Error: {result.Error}");
         }
     }
 }
