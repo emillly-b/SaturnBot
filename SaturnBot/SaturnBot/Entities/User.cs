@@ -15,7 +15,7 @@ namespace SaturnBot.Entities
         public string Username { get; set; }
         public ulong IntroMessageId { get; set; }
         public bool IsPresent { get; set; }
-
+        public override string ToString() => Username;
         public override string GenerateNewID() => DiscordId.ToString();
 
         public User(SocketGuildUser user)
@@ -24,6 +24,7 @@ namespace SaturnBot.Entities
             newuser.DiscordId = user.Id;
             newuser.IsPresent = true;
             newuser.Username = user.Username;
+            newuser.IntroMessageId = 0;
         }
 
         public User(ulong id)
