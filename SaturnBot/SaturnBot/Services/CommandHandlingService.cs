@@ -38,7 +38,7 @@ namespace SaturnBot.Services
                 return;
 
             // This value holds the offset where the prefix ends
-            var prefix = _services.GetService<CoreProviderService>().GetCore().Configuration.GetPrefix();
+            var prefix = _services.GetService<ConfigurationService>().Configuration.GetPrefix();
             var argPos = 0;
             if (!message.HasCharPrefix(prefix, ref argPos))
                 return;

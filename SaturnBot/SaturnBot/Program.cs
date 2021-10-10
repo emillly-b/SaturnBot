@@ -26,25 +26,25 @@ namespace SaturnBot
 
             using (var services = ConfigureServices(config))
             {
-                var core = services.GetService<CoreProviderService>().GetCore();
+                var configurationService = services.GetRequiredService<ConfigurationService>();
                 var client = services.GetRequiredService<DiscordShardedClient>();
                 var logger = services.GetRequiredService<LogService>();
-                logger.LogMessage("Log Started");
                 logger.InitializeAsync();
+                logger.LogMessage("Log Started");
+                await configurationService.InitializeBase();
 
-                await DB.InitAsync("saturndb", MongoClientSettings.FromConnectionString(core.Configuration.DataBaseString));
+                await DB.InitAsync("saturndb", MongoClientSettings.FromConnectionString(configurationService.Configuration.DataBaseString));
 
-
-                client.ShardReady += core.ReadyAsync;
-
+                await configurationService.InitializeGlobal();
                 await services.GetRequiredService<CommandHandlingService>().InitializeAsync();                
                 services.GetRequiredService<ReactionHandlingService>().Initialize();
 
-                await client.LoginAsync(TokenType.Bot, core.Configuration.BotToken);
+                await client.LoginAsync(TokenType.Bot, configurationService.Configuration.BotToken);
                 await client.StartAsync();
 
                 await Task.Delay(1000);
                 await services.GetRequiredService<GuildHandlingService>().InitializeAsync();
+                logger.LogMessage("All Services Loaded");
 
                 await Task.Delay(Timeout.Infinite);
             }
@@ -54,11 +54,11 @@ namespace SaturnBot
             return new ServiceCollection()
                 .AddSingleton(new DiscordShardedClient(config))
                 .AddSingleton<LogService>()
+                .AddSingleton<ConfigurationService>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
-                .AddSingleton<CoreProviderService>()
                 .AddSingleton<ReactionHandlingService>()    
-                .AddSingleton<GuildHandlingService>()
+                .AddSingleton<GuildHandlingService>()                
                 .BuildServiceProvider();
         }
     }

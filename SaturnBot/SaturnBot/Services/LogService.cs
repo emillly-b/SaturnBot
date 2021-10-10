@@ -35,6 +35,10 @@ namespace SaturnBot.Services
         {
             WriteMessage(message, LogSeverity.Info);
         }
+        public async Task LogWarning(string message)
+        {
+            WriteMessage(message, LogSeverity.Warning);
+        }
         public async Task LogMessage(LogMessage message)
         {
             Console.ForegroundColor = ConsoleColor.Gray;
