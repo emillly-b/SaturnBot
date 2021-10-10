@@ -86,8 +86,7 @@ namespace SaturnBot.Services
                         .WithCurrentTimestamp()
                         .WithAuthor(_discord.CurrentUser);
             embed.AddField("ID: ", user.Id, inline: true);
-            embed.AddField("Account Age", user.CreatedAt.ToString(), inline: true);
-            embed.AddField("User Status", user.Status.ToString());
+            embed.AddField("Created:", user.CreatedAt.ToString());
             var joinedEmbed = embed.Build();
             var log = _discord.GetChannel(context.LoggingChannelId) as ITextChannel;
             await log.SendMessageAsync("", embed: joinedEmbed);
@@ -104,8 +103,8 @@ namespace SaturnBot.Services
                         .WithCurrentTimestamp()
                         .WithAuthor(_discord.CurrentUser);
             embed.AddField("ID: ", user.Id, inline: true);
-            embed.AddField("Account Age", user.CreatedAt.ToString(), inline: true);
-            embed.AddField("Role Count", user.Roles.Count, inline: true);
+            embed.AddField("Created:", user.CreatedAt.ToString(), inline: true);
+            embed.AddField("Role Count:", user.Roles.Count, inline: true);
             var leftEmbed = embed.Build();
             var log = _discord.GetChannel(context.LoggingChannelId) as ITextChannel;
             await log.SendMessageAsync("", embed: leftEmbed);
