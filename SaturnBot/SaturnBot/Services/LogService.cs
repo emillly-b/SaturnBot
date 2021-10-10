@@ -23,6 +23,7 @@ namespace SaturnBot.Services
         public async Task InitializeAsync()
         {
             _discord.Log += LogDiscordMessage;
+            _commands.Log += LogMessage;
         }
         public async Task LogDiscordMessage(LogMessage message)
         {
@@ -33,6 +34,12 @@ namespace SaturnBot.Services
         public async Task LogMessage(string message)
         {
             WriteMessage(message, LogSeverity.Info);
+        }
+        public async Task LogMessage(LogMessage message)
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            WritePrefix(message.Severity);
+            Console.WriteLine(message.Message);
         }
 
         private void WriteMessage(string message, LogSeverity severitiy)
