@@ -25,6 +25,7 @@ namespace SaturnBot.Entities
         public ulong UnVerifiedRoleId { get; set; }
         public List<User> Members { get; set; }
         public override string GenerateNewID() => DiscordId.ToString();
+        public override string ToString() => Name;
         public override bool Equals(object obj)
         {            
             if (obj is not Guild) return false;
@@ -40,11 +41,10 @@ namespace SaturnBot.Entities
             OwnerId = socketGuild.OwnerId;
             Prefix = ">";
             Name = socketGuild.Name;
-            var members = socketGuild.Users.GetEnumerator();
-            while(members.MoveNext())
+            var members = socketGuild.Users.ToList();
+            foreach(SocketGuildUser user in members)
             {
-                var user = new User(members.Current);
-                Members.Add(user);
+                Members.Add(new User(user));
             }
         }
     }
