@@ -18,6 +18,20 @@ namespace SaturnBot.Modules
         public IServiceProvider Services { get; set; }
         public CommandService Commands { get; set; }
 
+        [Command("starboard")]
+        [Remarks("Enables or Disables the starboard")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        public async Task ToggleStarboardAsync()
+        {
+            var guild = Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id);
+            guild.Starboard.IsEnabled = !guild.Starboard.IsEnabled;
+            var text = "Disabled";
+            if (guild.Starboard.IsEnabled)
+                text = "Enabled";
+            await guild.SaveAsync();
+            await ReplyAsync($"Starboard has been: `{text}`");
+        }
+
         [Command("saferole")]
         [Remarks("Set's the role to assign when the welcome command is used.")]
         [RequireUserPermission(GuildPermission.ManageGuild)]
@@ -75,6 +89,18 @@ namespace SaturnBot.Modules
             guild.IntroChannelId = channelid;
             await guild.SaveAsync();
             await ReplyAsync($"Intro channel has been set to: {channelMention}");
+        }
+
+        [Command("starchannel")]
+        [Remarks("Sets the starboard channel.")]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
+        public async Task UpdateStarChannel(string channelMention)
+        {
+            var guild = Services.GetRequiredService<GuildHandlingService>().GetGuild(Context.Guild.Id);
+            ulong channelid = MentionUtils.ParseChannel(channelMention);
+            guild.Starboard.ChannelId = channelid;
+            await guild.SaveAsync();
+            await ReplyAsync($"Starboard has been set to: {channelMention}");
         }
 
         [Command("migrateintros")]
@@ -138,6 +164,9 @@ namespace SaturnBot.Modules
             builder.AddField("Safe Role:", MentionUtils.MentionRole(guild.VerifiedRoleId), inline: true);
             builder.AddField("Unsafe Role:", MentionUtils.MentionRole(guild.UnVerifiedRoleId), inline: true);
             builder.AddField("Intro Channel:", MentionUtils.MentionChannel(guild.IntroChannelId), inline: true);
+            builder.AddField("Starboard Enabled?:", $"`{guild.Starboard.IsEnabled}`");
+            builder.AddField("Starboard Channel:", $"`{guild.Starboard.ChannelId}`", inline: true);
+            builder.AddField("Starboard Star Count:", $"`{guild.Starboard.ReactionQuanitiy}`", inline: true);
             builder.AddField("Saturn Github:", "https://github.com/emillly-b/SaturnBot");
             await ReplyAsync("", embed: builder.Build());
         }

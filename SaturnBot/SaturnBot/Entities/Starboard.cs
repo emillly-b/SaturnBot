@@ -10,17 +10,27 @@ namespace SaturnBot.Entities
 {
     public class Starboard : Entity
     {
+        public bool IsEnabled { get; set; }
         public ulong ChannelId { get; set; }
-        public List<StarboardMessage> Messages { get; set; }
         public int ReactionQuanitiy { get; set; }
+        public List<StarboardMessage> Messages { get; set; }
 
+        public Starboard()
+        {
+            IsEnabled = false;
+            ChannelId = 0;
+            ReactionQuanitiy = 3;
+            Messages = new List<StarboardMessage>();
+
+        }
         public Starboard(ulong id, int reactionQuanity)
         {
+            IsEnabled = true;
             ChannelId = id;
             ReactionQuanitiy = reactionQuanity;
             Messages = new List<StarboardMessage>();
         }
-        private bool CheckEligibility(StarboardMessage message)
+        public bool CheckMessageEligibility(StarboardMessage message)
         {
             return message.StarCount > ReactionQuanitiy;
         }

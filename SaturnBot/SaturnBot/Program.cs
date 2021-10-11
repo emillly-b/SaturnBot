@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Encodings;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -36,15 +39,33 @@ namespace SaturnBot
                 await DB.InitAsync("saturndb", MongoClientSettings.FromConnectionString(configurationService.Configuration.DataBaseString));
 
                 await configurationService.InitializeGlobal();
-                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();                
-                services.GetRequiredService<ReactionHandlingService>().Initialize();
+                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
 
                 await client.LoginAsync(TokenType.Bot, configurationService.Configuration.BotToken);
                 await client.StartAsync();
 
                 await Task.Delay(1000);
                 await services.GetRequiredService<GuildHandlingService>().InitializeAsync();
+                await Task.Delay(1000);
+                services.GetRequiredService<ReactionHandlingService>().Initialize();
                 logger.LogMessage("All Services Loaded");
+
+                //// Let's do our global command
+                //var globalCommand = new SlashCommandBuilder();
+                //globalCommand.WithName("first-global-command");
+                //globalCommand.WithDescription("test");
+                //globalCommand.AddOption("url", ApplicationCommandOptionType.String, "test");
+
+                //try
+                //{
+
+                //    // With global commands we dont need the guild id.
+                //    await client.Rest.CreateGlobalCommand(globalCommand.Build());
+                //}
+                //catch (Exception exception)
+                //{
+                //    Console.WriteLine("Fucked up");
+                //}
 
                 await Task.Delay(Timeout.Infinite);
             }
