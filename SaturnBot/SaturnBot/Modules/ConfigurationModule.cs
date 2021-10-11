@@ -158,7 +158,7 @@ namespace SaturnBot.Modules
             };
             builder.WithCurrentTimestamp();
             builder.AddField("Guild settings for Guild:", $"`{guild.DiscordId}`");
-            builder.AddField("Owner:", $"{MentionUtils.MentionUser(guild.OwnerId)}", inline: true);
+            builder.AddField("Guild Owner:", $"{MentionUtils.MentionUser(guild.OwnerId)}", inline: true);
             builder.AddField("Prefix:", $"`{guild.Prefix}`", inline: true);
             builder.AddField("Log Channel:", MentionUtils.MentionChannel(guild.LoggingChannelId), inline: true);
             builder.AddField("Safe Role:", MentionUtils.MentionRole(guild.VerifiedRoleId), inline: true);
