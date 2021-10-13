@@ -45,6 +45,9 @@ namespace SaturnBot
                 await client.StartAsync();
 
                 await Task.Delay(1000);
+                await services.GetRequiredService<SlashCommandService>().InitializeAsync();
+
+                await Task.Delay(1000);
                 await services.GetRequiredService<GuildHandlingService>().InitializeAsync();
                 await Task.Delay(1000);
                 services.GetRequiredService<ReactionHandlingService>().Initialize();
@@ -78,6 +81,7 @@ namespace SaturnBot
                 .AddSingleton<ConfigurationService>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
+                .AddSingleton<SlashCommandService>()
                 .AddSingleton<ReactionHandlingService>()    
                 .AddSingleton<GuildHandlingService>()                
                 .BuildServiceProvider();
