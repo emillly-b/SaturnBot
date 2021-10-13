@@ -4,17 +4,38 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>57be0010-6904-437a-ba18-bc0acefe47a5</UserSecretsId>
+    <SignAssembly>false</SignAssembly>
+    <StartupObject>SaturnBot.Program</StartupObject>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net.Labs" Version="3.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
-    <PackageReference Include="MongoDB.Entities" Version="20.24.0" />
+    <PackageReference Include="MongoDB.Entities" Version="20.25.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Data\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Discord.Net.Commands">
+      <HintPath>..\..\..\Discord.Net-Labs\src\Discord.Net.Commands\bin\Debug\net5.0\Discord.Net.Commands.dll</HintPath>
+    </Reference>
+    <Reference Include="Discord.Net.Core">
+      <HintPath>..\..\..\Discord.Net-Labs\src\Discord.Net.Commands\bin\Debug\net5.0\Discord.Net.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Discord.Net.Rest">
+      <HintPath>..\..\..\Discord.Net-Labs\src\Discord.Net.Rest\bin\Debug\net5.0\Discord.Net.Rest.dll</HintPath>
+    </Reference>
+    <Reference Include="Discord.Net.WebSocket">
+      <HintPath>..\..\..\Discord.Net-Labs\src\Discord.Net.WebSocket\bin\Debug\net5.0\Discord.Net.WebSocket.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
